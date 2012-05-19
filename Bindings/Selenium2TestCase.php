@@ -123,12 +123,19 @@ abstract class Selenium2TestCase extends PHPUnit_Framework_TestCase
 	private static $sessionId;
 
 	/**
+	 * The domain used to set the Coverage Domain Cookie
+	 * @var string
+	 */
+	protected $coverageDomain = false;
+	
+	/**
 	 * @param boolean
 	 */
 	public static function shareSession($shareSession)
 	{
 		self::$shareSession = $shareSession;
 	}
+	
 
 	/**
 	 * @param  string $name
@@ -267,7 +274,7 @@ abstract class Selenium2TestCase extends PHPUnit_Framework_TestCase
 		}
 
 		$driver = new Selenium2TestDriver($browser['host'], $browser['port']);
-		$driver->connect($browser['browser']);
+		$driver->setBrowser($browser['browser']);
 		//$driver->setTimeout($browser['timeout']);
 		//$driver->setHttpTimeout($browser['httpTimeout']);
 		//$driver->setTestCase($this);
@@ -280,10 +287,7 @@ abstract class Selenium2TestCase extends PHPUnit_Framework_TestCase
 
 	public function skipWithNoServerRunning()
 	{
-		try {
-			fsockopen($this->drivers[0]->getHost(), $this->drivers[0]->getPort(), $errno, $errstr, $this->serverConnectionTimeOut);
-			$this->serverRunning = TRUE;
-		} catch (PHPUnit_Framework_Error_Warning $e) {
+		if (!isset($this->drivers[0])) {
 			$this->markTestSkipped(
 					sprintf(
 							'Could not connect to the Selenium Server on %s:%d.',
@@ -292,6 +296,8 @@ abstract class Selenium2TestCase extends PHPUnit_Framework_TestCase
 					)
 			);
 			$this->serverRunning = FALSE;
+		} else {
+			$this->serverRunning = TRUE;
 		}
 	}
 
@@ -302,15 +308,17 @@ abstract class Selenium2TestCase extends PHPUnit_Framework_TestCase
 	{
 		$testCaseClassVars = get_class_vars(get_class($this));
 		if ($testCaseClassVars['browsers']) {
-			return $this->start();
+			$s = $this->start($this->coverageDomain);
+			return $s;
 		}
 		if (self::$shareSession && self::$sessionId !== NULL) {
 			$this->setSessionId(self::$sessionId);
 			$this->selectWindow('null');
 		} else {
-			self::$sessionId = $this->start();
+			self::$sessionId = $this->start($this->coverageDomain);
 		}
-
+		
+		
 		return self::$sessionId;
 	}
 
@@ -623,14 +631,11 @@ abstract class Selenium2TestCase extends PHPUnit_Framework_TestCase
 	 */
 	protected function getCodeCoverage()
 	{
+		return;
 		if (!empty($this->coverageScriptUrl)) {
-			$facade = new File_Iterator_Facade;
-			$files  = $facade->getFilesAsArray(
-					$GLOBALS['PHPUNIT_COVERAGE_DATA_DIRECTORY'],
-					$_GET['PHPUNIT_SELENIUM_TEST_ID']
-			);
 			$coverage = array();
-			foreach ($files as $file) {
+			var_dump(glob($this->coverageScriptUrl."/*".$this->testId));
+			foreach (glob($this->coverageScriptUrl."/*".$this->testId) as $file) {
 				$data = unserialize(file_get_contents($file));
 				unlink($file);
 				unset($file);
@@ -654,8 +659,9 @@ abstract class Selenium2TestCase extends PHPUnit_Framework_TestCase
 				}
 			}
 			 
-			print serialize($coverage);
+			return $coverage;
 		}
+		/*
 		$url = sprintf(
 				'%s?PHPUNIT_SELENIUM_TEST_ID=%s',
 				$this->coverageScriptUrl,
@@ -672,6 +678,7 @@ abstract class Selenium2TestCase extends PHPUnit_Framework_TestCase
 				throw new Exception('Empty or invalid code coverage data received from url "' . $url . '"');
 			}
 		}
+		*/
 	
 
 	return array();
@@ -765,7 +772,7 @@ protected function onNotSuccessfulTest(Exception $e)
 	try {
 		$this->restoreSessionStateAfterFailedTest();
 
-		$buffer  = 'Current URL: ' . $this->drivers[0]->getLocation() .
+		$buffer  = 'Current URL: ' . $this->drivers[0]->getCurrentUrl() .
 		"\n";
 
 		if ($this->captureScreenshotOnFailure) {
