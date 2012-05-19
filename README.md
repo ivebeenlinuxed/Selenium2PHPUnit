@@ -1,4 +1,4 @@
-=Selenium2PHPUnit
+Selenium2PHPUnit
 =================
 
 Selenium 2 integration with PHPUnit is appauling at the moment - Really hated not being able to test in multiple browsers, so decided to use the old Selenium PHPUnit code, mixed in with a new Selenium 2 driver.
