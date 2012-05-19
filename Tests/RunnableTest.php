@@ -20,6 +20,8 @@ class RunnableTest extends Selenium2TestCase {
 	
 	
 	public function test_RunnableTest() {
+		//require_once "htdocs/index.php";
+		//unused();
 		$this->assertEquals(true, true);
 		$this->get("http://s2.ipv6.bcslichfield.com/");
 		sleep(10);

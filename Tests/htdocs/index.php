@@ -3,7 +3,7 @@ require __DIR__."/../../Bindings/includes/prepend.php";
 function unused() {
 	$a = 1;
 	$a++;
-	$b = 2;
+	$b = rand(1, 100);
 	return;
 	
 	$c = 5;
@@ -11,6 +11,7 @@ function unused() {
 
 function used() {
 	echo "Hello World";
+	rand(1, 100);
 	return 1;
 	
 	$a = 5;

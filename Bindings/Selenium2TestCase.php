@@ -202,6 +202,7 @@ abstract class Selenium2TestCase extends PHPUnit_Framework_TestCase
 			$result->getCodeCoverage()->append(
 					$this->getCodeCoverage(), $this
 			);
+			var_dump($result->getCodeCoverage());
 		}
 
 		return $result;
@@ -631,16 +632,14 @@ abstract class Selenium2TestCase extends PHPUnit_Framework_TestCase
 	 */
 	protected function getCodeCoverage()
 	{
-		return;
 		if (!empty($this->coverageScriptUrl)) {
 			$coverage = array();
-			var_dump(glob($this->coverageScriptUrl."/*".$this->testId));
 			foreach (glob($this->coverageScriptUrl."/*".$this->testId) as $file) {
 				$data = unserialize(file_get_contents($file));
 				unlink($file);
 				unset($file);
 				$filter = new PHP_CodeCoverage_Filter();
-				 
+				 /*
 				foreach ($data as $file => $lines) {
 					if ($filter->isFile($file)) {
 						if (!isset($coverage[$file])) {
@@ -657,9 +656,10 @@ abstract class Selenium2TestCase extends PHPUnit_Framework_TestCase
 						}
 					}
 				}
+				*/
 			}
-			 
-			return $coverage;
+			
+			return $data;
 		}
 		/*
 		$url = sprintf(
