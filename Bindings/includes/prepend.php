@@ -52,7 +52,6 @@ if (!isset($GLOBALS['PHPUNIT_COVERAGE_DATA_DIRECTORY'])) {
     $GLOBALS['PHPUNIT_COVERAGE_DATA_DIRECTORY'] = __DIR__."/../../logs/";
 }
 
-var_dump($_COOKIE);
 
 if ( isset($_COOKIE['PHPUNIT_SELENIUM_TEST_ID']) &&
     !isset($_GET['PHPUNIT_SELENIUM_TEST_ID']) &&
