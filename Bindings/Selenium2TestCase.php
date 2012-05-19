@@ -633,51 +633,15 @@ abstract class Selenium2TestCase extends PHPUnit_Framework_TestCase
 	{
 		if (!empty($this->coverageScriptUrl)) {
 			$coverage = array();
-			foreach (glob($this->coverageScriptUrl."/*".$this->testId) as $file) {
+			$files = glob($this->coverageScriptUrl."/*".$this->testId);
+			if (count($files) == 1) {
+				$file = $files[0];
 				$data = unserialize(file_get_contents($file));
 				unlink($file);
 				unset($file);
-				$filter = new PHP_CodeCoverage_Filter();
-				 /*
-				foreach ($data as $file => $lines) {
-					if ($filter->isFile($file)) {
-						if (!isset($coverage[$file])) {
-							$coverage[$file] = array(
-									'md5' => md5_file($file), 'coverage' => $lines
-							);
-						} else {
-							foreach ($lines as $line => $flag) {
-								if (!isset($coverage[$file]['coverage'][$line]) ||
-										$flag > $coverage[$file]['coverage'][$line]) {
-									$coverage[$file]['coverage'][$line] = $flag;
-								}
-							}
-						}
-					}
-				}
-				*/
-			}
-			
-			return $data;
-		}
-		/*
-		$url = sprintf(
-				'%s?PHPUNIT_SELENIUM_TEST_ID=%s',
-				$this->coverageScriptUrl,
-				$this->testId
-		);
-
-		$buffer = @file_get_contents($url);
-
-		if ($buffer !== FALSE) {
-			$coverageData = unserialize($buffer);
-			if (is_array($coverageData)) {
-				return $this->matchLocalAndRemotePaths($coverageData);
-			} else {
-				throw new Exception('Empty or invalid code coverage data received from url "' . $url . '"');
+				return $data;
 			}
 		}
-		*/
 	
 
 	return array();
@@ -767,13 +731,12 @@ protected function onNotSuccessfulTest(Exception $e)
 	if (!$this->serverRunning) {
 		throw $e;
 	}
-
+	
+	
+	$this->restoreSessionStateAfterFailedTest();
+	$buffer  = 'Current URL: ' . $this->drivers[0]->getCurrentUrl() .
+	"\n"."Current Browser: {$this->drivers[0]->getBrowser()}";
 	try {
-		$this->restoreSessionStateAfterFailedTest();
-
-		$buffer  = 'Current URL: ' . $this->drivers[0]->getCurrentUrl() .
-		"\n";
-
 		if ($this->captureScreenshotOnFailure) {
 			$screenshotInfo = $this->takeScreenshot();
 			if ($screenshotInfo != '') {
