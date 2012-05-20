@@ -35,6 +35,10 @@ class Selenium2TestDriver extends WebDriver {
 		$this->browser = $browser;
 	}
 	
+	public function getBrowser() {
+		return $this->browser;
+	}
+	
 	public function start($url=false) {
 		$this->connect($this->browser);
 		$this->setupCodeCoverage($url);
